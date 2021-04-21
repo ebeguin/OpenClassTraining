@@ -4,6 +4,7 @@
 import analysis.csv as c_an
 import analysis.xml as x_an
 import argparse
+import MPS
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
@@ -21,7 +22,8 @@ if __name__ == "__main__":
         if args.extension == 'xml':
             x_an.launch_analysis(datafile)
         elif args.extension == 'csv':
-            c_an.launch_analysis(datafile)
+            #c_an.launch_analysis(datafile)
+            MPS.launch_analysis(datafile)
 
 
-        main()
+        #main()

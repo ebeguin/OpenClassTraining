@@ -1,16 +1,61 @@
 import os
-import logging as lg
+import matplotlib.pyplot as mps
+import numpy as np
+import pandas as pd
 
-def launch_analysis(data_file):
-    directory = os.path.dirname(os.path.dirname(__file__)) # we get the right path.
-    path_to_file = os.path.join(directory, "data", data_file) # with this path, we go inside the folder `data` and get the file.
-    lg.basicConfig(level=lg.DEBUG)
-    try:
-        with open(path_to_file,"r") as f:
-            preview = f.readline()
-            lg.debug( 'Yeah! We managed to read the file. Here is a preview: {}'.format ( preview ) )
-    except FileNotFoundError as e :
-        lg.critical("erreur d'ouvertures : {}".format(e.filename))
+
+class SetOfParliamentMembers:
+    def __init__(self, name):
+        self.name = name
+
+    def data_from_csv(self, csv_file):
+        self.dataframe = pd.read_csv(csv_file, sep=";")
+
+    def data_from_dataframe(self, dataframe):
+        self.dataframe = dataframe
+
+    def display_chart(self):
+        data = self.dataframe
+        SPM_femmes = data[data.sexe == "F"]
+        SPM_hommes = data[data.sexe == "M"]
+        counts = [len(SPM_femmes), len(SPM_hommes)]
+        np_counts = np.array(counts)
+        spm_nb = np_counts.sum()
+        proportions = np_counts / spm_nb
+        labels = ["female: ({})".format(counts[0]), "male: ({})".format(counts[1])]
+        fig, ax = mps.subplots()
+        ax.axis("equals")
+        ax.pie(
+            proportions,
+            labels=labels,
+            autopct="%1.1f pourcents"
+        )
+        mps.title("{} ({} MPS)".format(self.name, spm_nb))
+
+
+    def split_by_political_party(self):
+        result = {}
+        data = self.dataframe
+
+        all_parties = data["parti_ratt_financier"].dropna().unique()
+
+        for party in all_parties:
+            data_subset = data[data.parti_ratt_financier == party]
+            subset = SetOfParliamentMembers('MPs from party "{}"'.format(party))
+            subset.data_from_dataframe(data_subset)
+            result[party] = subset
+
+        return result
+
+
+def launch_analysis(data_file, by_party=False):
+    sopm = SetOfParliamentMembers("All MPs")
+    sopm.data_from_csv(os.path.join("data", data_file))
+    sopm.display_chart()
+
+    if by_party:
+        for party, s in sopm.split_by_political_party().items():
+            s.display_chart()
 
 
 if __name__ == "__main__":
