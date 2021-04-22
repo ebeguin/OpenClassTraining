@@ -9,28 +9,29 @@ class SetOfParliamentMembers:
         self.name = name
 
     def data_from_csv(self, csv_file):
-        self.dataframe = pd.read_csv(csv_file, sep=";")
+        self.dataframe = pd.read_csv(csv_file, sep=';')
 
     def data_from_dataframe(self, dataframe):
         self.dataframe = dataframe
 
     def display_chart(self):
         data = self.dataframe
-        SPM_femmes = data[data.sexe == "F"]
-        SPM_hommes = data[data.sexe == "M"]
+        SPM_femmes = data[data.sexe == 'F']
+        SPM_hommes = data[data.sexe == 'H']
         counts = [len(SPM_femmes), len(SPM_hommes)]
         np_counts = np.array(counts)
         spm_nb = np_counts.sum()
         proportions = np_counts / spm_nb
         labels = ["female: ({})".format(counts[0]), "male: ({})".format(counts[1])]
         fig, ax = mps.subplots()
-        ax.axis("equals")
+        ax.axis('equal')
         ax.pie(
             proportions,
             labels=labels,
             autopct="%1.1f pourcents"
         )
         mps.title("{} ({} MPS)".format(self.name, spm_nb))
+        mps.show()
 
 
     def split_by_political_party(self):
@@ -50,7 +51,7 @@ class SetOfParliamentMembers:
 
 def launch_analysis(data_file, by_party=False):
     sopm = SetOfParliamentMembers("All MPs")
-    sopm.data_from_csv(os.path.join("data", data_file))
+    sopm.data_from_csv(os.path.join("../data", data_file))
     sopm.display_chart()
 
     if by_party:
