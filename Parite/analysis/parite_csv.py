@@ -8,6 +8,26 @@ class SetOfParliamentMembers:
     def __init__(self, name):
         self.name = name
 
+    def __len__(self):
+        return len ( self.dataframe )
+
+    def __getitem__(self, item):
+        return self.dataframe[item]
+
+    def __repr__(self):
+        return "SetOfParliament Memeer : {}".format ( len ( self.dataframe ) )
+
+    def __iter__(self):
+        self.iterator_state=0
+        return self
+
+    def __next__(self):
+        if self.iterator_state >= len(self):
+            raise StopIteration
+        else:
+            result = self[self.iterator_state]
+            self.iterator_state+=1
+            return result
     def data_from_csv(self, csv_file):
         self.dataframe = pd.read_csv(csv_file, sep=';')
 
@@ -34,6 +54,7 @@ class SetOfParliamentMembers:
         mps.show()
 
 
+
     def split_by_political_party(self):
         result = {}
         data = self.dataframe
@@ -49,15 +70,20 @@ class SetOfParliamentMembers:
         return result
 
 
-def launch_analysis(data_file, by_party=False):
+def launch_analysis(data_file, by_party=False, info=False):
     sopm = SetOfParliamentMembers("All MPs")
     sopm.data_from_csv(os.path.join("../data", data_file))
+    for mp in sopm:
+        print(mp["nom"],mp["emails"])
     sopm.display_chart()
 
     if by_party:
         for party, s in sopm.split_by_political_party().items():
             s.display_chart()
 
+    if info:
+        print(sopm)
+
 
 if __name__ == "__main__":
-    launch_analysis('current_mps.csv')
+    launch_analysis('current_mps.csv',)
